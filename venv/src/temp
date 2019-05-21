@@ -1,0 +1,112 @@
+import requests
+import os
+import json
+import logging
+import secrets
+import urllib.parse
+import datetime
+from hashlib import sha1
+from requests_oauthlib import OAuth1
+
+
+def per_encode(tup):
+    return urllib.parse.quote(tup[0], safe=''), urllib.parse.quote(tup[1], safe='')
+
+
+def get_tweets():
+    nonce = secrets.token_urlsafe(32)
+    epoch = str(int(datetime.datetime.utcnow().timestamp()))
+    url = "https://api.twitter.com/1.1/search/tweets.json"
+    url = "https://api.twitter.com/1.1/statuses/user_timeline.json"
+
+    q_param = ('q', '@BBCPolitics')
+
+    #OAuth1(YOUR_APP_KEY', 'YOUR_APP_SECRET', 'USER_OAUTH_TOKEN', 'USER_OAUTH_TOKEN_SECRET')
+    auth = OAuth1('1QUYxqT3fLJzznjF6qubfCU8N', 'Vnt2uyXpbRWABCVz6W3r70ZiS3T7sm3jIMHyoTTuiMAgPuK8hE',
+                  '1112706472360771588-b5xCR7oQn6dB0brCADkJvh0ejUKtSc', 'J1DevmDejLeaI3DaLG5xbnYKNvrh1yMtw7irmcko4tU0r')
+
+    """
+    headers = {'Content-Type': 'application/x-www-form-urlencoded',
+               'Host': 'api.twitter.com'
+               }
+    """
+
+    payload = {'q': '@BBCPolitics'}
+    payload = {'screen_name': 'BBCPolitics',
+               'exclude_replies': True,
+               'include_rts': False}
+    r = requests.get(url, auth=auth, params=payload)
+    print(r)
+    print("ok")
+    """
+    consumer_key_param = ('oauth_consumer_key', '1QUYxqT3fLJzznjF6qubfCU8N')
+    nonce_param = ('oauth_nonce', nonce)
+    signature_method_param = ('oauth_signature_method', 'HMAC-SHA1')
+    timestamp_param = ('oauth_timestamp', epoch)
+    token_param = ('oauth_token', '1112706472360771588-AnySzwne3jiO9v5oB0xAtiqjW8At3R')
+    version_param = ('oauth_version', '1.0')
+
+
+
+
+    lst_param = [per_encode(q_param),
+                 per_encode(consumer_key_param),
+                 per_encode(nonce_param),
+                 per_encode(signature_method_param),
+                 per_encode(timestamp_param),
+                 per_encode(token_param),
+                 per_encode(version_param)]
+    lst_param.sort(key=lambda tup: tup[1])
+
+    param_str = ''
+    for i in range(len(lst_param)):
+        param_str += lst_param[i][0] + '=' + lst_param[i][1]
+        if i + 1 != len(lst_param):
+            param_str += '&'
+
+    url = "https://api.twitter.com/1.1/search/tweets.json"
+
+    sign_base_str = 'POST&' + urllib.parse.quote(url, safe='') + '&' + urllib.parse.quote(param_str, safe='')
+
+    signing_key = urllib.parse.quote('Vnt2uyXpbRWABCVz6W3r70ZiS3T7sm3jIMHyoTTuiMAgPuK8hE', safe='')
+    signing_key += "&"
+    signing_key += urllib.parse.quote('XA4XdIn3gVWGRDHSZFKNOXJ39A7SWzLqttgItu2ucmShd', safe='')
+
+    hashed = hmac.new(str.encode(signing_key), str.encode(sign_base_str), sha1)
+    print(hashed)
+    # The signature
+    signature = hashed.digest().encode("base64").rstrip('\n')
+
+    print(signature)
+
+    auth_hdr_val = '' + consumer_key_param[0] + '="' + consumer_key_param[1] + '", '
+    auth_hdr_val += nonce_param[0] + '="' + nonce_param[1] + '", '
+    #auth_hdr_val += nonce_param[0] + '="' + nonce_param[1] + '", '
+    auth_hdr_val += signature_method_param[0] + '="' + signature_method_param[1] + '", '
+    auth_hdr_val += timestamp_param[0] + '="' + timestamp_param[1] + '", '
+    auth_hdr_val += token_param[0] + '="' + token_param[1] + '", '
+    auth_hdr_val += version_param[0] + '="' + version_param[1] + '"'
+
+    """
+
+
+def main():
+    """
+    logging.basicConfig(filename=directory_root + '/log.txt',
+                        filemode='a',
+                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        datefmt='%H:%M:%S',
+                        level=logging.DEBUG)
+    #logging.info("The Guardian News Collector")
+    #logging.getLogger('TGNC')
+    #process_items()
+    """
+    get_tweets()
+    # TODO: Added timing thresholds but need to add limit per day
+    # TODO: Added timing thresholds but need to add saving the queue
+    # TODO: Need to add cron job, and overall begin and end
+
+
+if __name__ == "__main__":
+    main()
+    print("done")
